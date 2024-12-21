@@ -1,0 +1,11 @@
+[Unit]
+Description=BitrixIntegration
+
+[Service]
+Type=simple
+Restart=always
+WorkingDirectory=/home/admin/b
+ExecStart=/home/admin/b/venv/bin/python3 /home/admin/b/main.py
+
+[Install]
+WantedBy=multi-user.target
