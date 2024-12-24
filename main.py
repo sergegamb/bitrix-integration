@@ -15,6 +15,7 @@ app.add_middleware(
         allow_origins=['*'],
         allow_methods=['*'],
 )
+load_dotenv()
 BITRIX_SECRET = os.getenv('BITRIX_SECRET')
 SC_TOKEN = os.getenv('SC_TOKEN')
 
@@ -27,7 +28,7 @@ async def main(request: Request):
     for elem in hook_parameters:
         k, v = elem.split('=')
         hook_params_dict[k] = v
-    task_id = hook_params_dict['data[FIELDS_AFTER][TASK_ID]']
+    task_id = hook_params_dict['data[FIELDS_AFTER][ID]']
 
     task_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/tasks.task.get?taskId={task_id}'
