@@ -48,6 +48,25 @@ async def main(request: Request):
     result = user_response_json['result'][0]
     user_email = result['EMAIL']
 
+    task_item_response = requests.get(
+            f'https://crm.agneko.com/rest/{BITRIX_SECRET}/task.item.getdata?taskId={task_id}'
+    }
+    task_item_response_json = task_item_response.json()
+    result = task_item_response_json.get('result')
+    uf_crm_task = result.get('UF_CRM_TASK')
+    lead_id = uf_crm_task[0].split('_')
+
+    lead_response = requests.get(
+            f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
+    }.json()
+    contact_id = lead_response.get('result').get('CONTACT_ID')
+
+    contact_response = requests.get(
+            f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
+    ).json()
+    contact_email = contact_response.get('result').get('EMAIL').get('VALUE')
+    print(contact_email)
+
     sdp_task = {
             'task': {
                 'title': task_title,
