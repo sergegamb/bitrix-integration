@@ -32,33 +32,26 @@ async def main(request: Request):
 
     task_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/tasks.task.get?taskId={task_id}'
-    )
-    task_response_json = task_response.json()
-    result = task_response_json['result']
-    task = result['task']
+    ).json()
+    task = task_response['result']['task']
     task_title = task['title']
     task_description = task['description']
-    responsible = task['responsible']
-    responsible_id = responsible['id']
+    responsible_id = task['responsible']['id']
 
     user_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/user.get.json?ID={responsible_id}'
-    )
-    user_response_json = user_response.json()
-    result = user_response_json['result'][0]
-    user_email = result['EMAIL']
+    ).json()
+    user_email = user_response_json['result'][0]['EMAIL']
 
     task_item_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/task.item.getdata?taskId={task_id}'
-    }
-    task_item_response_json = task_item_response.json()
-    result = task_item_response_json.get('result')
-    uf_crm_task = result.get('UF_CRM_TASK')
+    ).json()
+    uf_crm_task = task_item_response.get('result').get('UF_CRM_TASK')
     lead_id = uf_crm_task[0].split('_')
 
     lead_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
-    }.json()
+    ).json()
     contact_id = lead_response.get('result').get('CONTACT_ID')
 
     contact_response = requests.get(
