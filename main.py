@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 
 from dotenv import load_dotenv
@@ -18,6 +19,8 @@ app.add_middleware(
 load_dotenv()
 BITRIX_SECRET = os.getenv('BITRIX_SECRET')
 SC_TOKEN = os.getenv('SC_TOKEN')
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @app.post('/')
@@ -29,47 +32,55 @@ async def main(request: Request):
         k, v = elem.split('=')
         hook_params_dict[k] = v
     task_id = hook_params_dict['data[FIELDS_AFTER][ID]']
+    logger.info(f'{task_id=}')
 
     task_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/tasks.task.get?taskId={task_id}'
     ).json()
     task = task_response['result']['task']
     task_title = task['title']
+    logger.info(f'Got task {task_title}')
     task_description = task['description']
     responsible_id = task['responsible']['id']
+    logger.info(f'{responsible_id=}')
 
     user_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/user.get.json?ID={responsible_id}'
     ).json()
-    user_email = user_response_json['result'][0]['EMAIL']
+    user_email = user_response['result'][0]['EMAIL']
+    logger.info(f'{user_email=}')
 
     task_item_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/task.item.getdata?taskId={task_id}'
     ).json()
     uf_crm_task = task_item_response.get('result').get('UF_CRM_TASK')
-    lead_id = uf_crm_task[0].split('_')
+    lead_id = uf_crm_task[0].split('_')[-1]
+    logger.info(f'{lead_id=}')
 
     lead_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
     ).json()
     contact_id = lead_response.get('result').get('CONTACT_ID')
+    logger.info(f'{contact_id=}')
 
     contact_response = requests.get(
-            f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
+            f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.contact.get?id={contact_id}'
     ).json()
-    contact_email = contact_response.get('result').get('EMAIL').get('VALUE')
-    print(contact_email)
+    contact_email = contact_response.get('result').get('EMAIL')[0].get('VALUE')
+    logger.info(f'{contact_email=}')
 
     sdp_task = {
             'task': {
                 'title': task_title,
                 'description': task_description,
                 'owner': {
-
                     'email_id': user_email,
                 },
                 'status': {
                     'name': 'Открыта'
+                },
+                'account': {
+                    'name': contact_email
                 }
             }
     }
