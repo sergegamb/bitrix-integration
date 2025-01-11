@@ -71,8 +71,8 @@ async def main(request: Request):
 
     sdp_task = {
             'task': {
-                'title': task_title,
-                'description': task_description,
+                'title': task['title'],
+                'description': task['description'],
                 'owner': {
                     'email_id': user_email,
                 },
@@ -84,6 +84,7 @@ async def main(request: Request):
                 }
             }
     }
+
     params = {'input_data': json.dumps(sdp_task)}
     headers = {'authtoken': SC_TOKEN}
     sdp_task_response = requests.post(
