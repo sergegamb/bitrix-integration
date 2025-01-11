@@ -34,7 +34,6 @@ async def main(request: Request):
     task_id = hook_params_dict['data[FIELDS_AFTER][ID]']
     logger.info(f'{task_id=}')
 
-def main(task_id):
     task_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/tasks.task.get?taskId={task_id}'
     ).json()
@@ -115,7 +114,6 @@ def main(task_id):
 
 
 if __name__ == '__main__':
-    main(8748)
     uvicorn.run('main:app',
                 host='0.0.0.0',
                 port=8000,
