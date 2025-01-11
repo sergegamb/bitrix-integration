@@ -34,6 +34,7 @@ async def main(request: Request):
     task_id = hook_params_dict['data[FIELDS_AFTER][ID]']
     logger.info(f'{task_id=}')
 
+def main(task_id):
     task_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/tasks.task.get?taskId={task_id}'
     ).json()
@@ -69,6 +70,27 @@ async def main(request: Request):
     contact_email = contact_response.get('result').get('EMAIL')[0].get('VALUE')
     logger.info(f'{contact_email=}')
 
+
+
+    headers = {'authtoken': SC_TOKEN}
+    list_info = {
+        "list_info": {
+            "row_count": "10",
+            "start_index": "1",
+            "sort_field": "name",
+            "sort_order": "asc",
+            "search_fields": {
+                "name": contact_email.split('@')[-1]
+            }
+        }
+    }
+    params = {'input_data': json.dumps(list_info)}
+    account_response = requests.get(
+            url='https://support.agneko.com/api/v3/accounts',
+            headers=headers, params=params, verify=False,
+    ).json()
+    account = account_response.get('accounts')[0]
+
     sdp_task = {
             'task': {
                 'title': task['title'],
@@ -80,13 +102,11 @@ async def main(request: Request):
                     'name': 'Открыта'
                 },
                 'account': {
-                    'name': contact_email
+                    'id': account.get('id')
                 }
             }
     }
-
     params = {'input_data': json.dumps(sdp_task)}
-    headers = {'authtoken': SC_TOKEN}
     sdp_task_response = requests.post(
             url='https://support.agneko.com/api/v3/tasks',
             headers=headers, params=params, verify=False,
@@ -95,6 +115,7 @@ async def main(request: Request):
 
 
 if __name__ == '__main__':
+    main(8748)
     uvicorn.run('main:app',
                 host='0.0.0.0',
                 port=8000,
