@@ -113,6 +113,29 @@ async def main(request: Request):
     print(sdp_task_response.json())
 
 
+
+@app.post('/a')
+async def a(request: Request):
+    body = await request.body()
+    hook_parameters = unquote(body.decode()).split('&')
+    hook_params_dict = {}
+    for elem in hook_parameters:
+        k, v = elem.split('=')
+        hook_params_dict[k] = v
+    print(hook_parameters)
+
+
+@app.post('/b')
+async def b(request: Request):
+    body = await request.body()
+    hook_parameters = unquote(body.decode()).split('&')
+    hook_params_dict = {}
+    for elem in hook_parameters:
+        k, v = elem.split('=')
+        hook_params_dict[k] = v
+        logger.info(elem)
+    
+
 if __name__ == '__main__':
     uvicorn.run('main:app',
                 host='0.0.0.0',
