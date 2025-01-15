@@ -134,9 +134,6 @@ async def b(request: Request):
     body = await request.body()
     hook_parameters = unquote(body.decode()).split('&')
 
-def bb():
-    hook_parameters = ['data[FIELDS_AFTER][TASK_ID]=8756', 'data[FIELDS_AFTER][ID]=36211']
-
     hook_params_dict = {}
     for elem in hook_parameters:
         k, v = elem.split('=')
@@ -153,7 +150,6 @@ def bb():
 
     logger.info(b_task_comment_text)
 
-def bb(b_task_id):
     list_info = {
         "list_info": {
             "row_count": "1",
@@ -179,16 +175,16 @@ def bb(b_task_id):
             },
         }
     }
-    params = {'input_data': json.dumps(list_info)}
+    params = {'input_data': json.dumps(task_update)}
     sdp_task_response = requests.put(
             url=f'https://support.agneko.com/api/v3/tasks/{sc_task_id}',
             headers=headers, params=params, verify=False,
     )
+    logger.info(sdp_task_response.json())
 
     
 
 if __name__ == '__main__':
-    bb(100)
     uvicorn.run('main:app',
                 host='0.0.0.0',
                 port=8000,
