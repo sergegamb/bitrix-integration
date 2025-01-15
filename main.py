@@ -130,7 +130,7 @@ async def a(request: Request):
 
 
 @app.post('/b')
-async def b(request: Request):
+async def comment_task_was_completed(request: Request):
     body = await request.body()
     hook_parameters = unquote(body.decode()).split('&')
 
@@ -149,38 +149,41 @@ async def b(request: Request):
     b_task_comment_text = comment_result.get('POST_MESSAGE')
 
     logger.info(b_task_comment_text)
-
-    list_info = {
-        "list_info": {
-            "row_count": "1",
-            "search_fields": {
-                    'udf_fields.sline_bitrix_task_id': b_task_id
+    if (b_task_comment_text == 'Задача завершена.'):
+    {
+        list_info = {
+            "list_info": {
+                "row_count": "1",
+                "search_fields": {
+                        'udf_fields.sline_bitrix_task_id': b_task_id
+                }
             }
         }
-    }
-    headers = {'authtoken': SC_TOKEN}
-    params = {'input_data': json.dumps(list_info)}
-    sdp_task_response = requests.get(
-            url='https://support.agneko.com/api/v3/tasks',
-            headers=headers, params=params, verify=False,
-    )
-    logger.info(sdp_task_response.json())
-    sc_task_id = sdp_task_response.json().get('tasks')[0].get('id')
-    logger.info(f'{sc_task_id=}')
+        headers = {'authtoken': SC_TOKEN}
+        params = {'input_data': json.dumps(list_info)}
+        sdp_task_response = requests.get(
+                url='https://support.agneko.com/api/v3/tasks',
+                headers=headers, params=params, verify=False,
+        )
+        logger.info(sdp_task_response.json())
+        sc_task_id = sdp_task_response.json().get('tasks')[0].get('id')
+        logger.info(f'{sc_task_id=}')
 
-    task_update = {
-        "task": {
-            "status": {
-                "name": "Закрыта"
-            },
+        task_update = {
+            "task": {
+                "status": {
+                    "name": "Закрыта"
+                },
+            }
         }
+        params = {'input_data': json.dumps(task_update)}
+        sdp_task_response = requests.put(
+                url=f'https://support.agneko.com/api/v3/tasks/{sc_task_id}',
+                headers=headers, params=params, verify=False,
+        )
+        logger.info(sdp_task_response.json())
     }
-    params = {'input_data': json.dumps(task_update)}
-    sdp_task_response = requests.put(
-            url=f'https://support.agneko.com/api/v3/tasks/{sc_task_id}',
-            headers=headers, params=params, verify=False,
-    )
-    logger.info(sdp_task_response.json())
+    # TODO: else add worklog
 
     
 
