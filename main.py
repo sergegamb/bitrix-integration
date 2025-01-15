@@ -150,7 +150,6 @@ async def comment_task_was_completed(request: Request):
 
     logger.info(b_task_comment_text)
     if (b_task_comment_text == 'Задача завершена.'):
-    {
         list_info = {
             "list_info": {
                 "row_count": "1",
@@ -182,7 +181,6 @@ async def comment_task_was_completed(request: Request):
                 headers=headers, params=params, verify=False,
         )
         logger.info(sdp_task_response.json())
-    }
     # TODO: else add worklog
 
     
