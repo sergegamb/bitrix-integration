@@ -102,6 +102,9 @@ async def main(request: Request):
                 },
                 'account': {
                     'id': account.get('id')
+                },
+                'udf_fields': {
+                    'sline_bitrix_task_id': task_id
                 }
             }
     }
@@ -121,6 +124,7 @@ async def a(request: Request):
     hook_params_dict = {}
     for elem in hook_parameters:
         k, v = elem.split('=')
+
         hook_params_dict[k] = v
     print(hook_parameters)
 
@@ -129,14 +133,62 @@ async def a(request: Request):
 async def b(request: Request):
     body = await request.body()
     hook_parameters = unquote(body.decode()).split('&')
+
+def bb():
+    hook_parameters = ['data[FIELDS_AFTER][TASK_ID]=8756', 'data[FIELDS_AFTER][ID]=36211']
+
     hook_params_dict = {}
     for elem in hook_parameters:
         k, v = elem.split('=')
         hook_params_dict[k] = v
         logger.info(elem)
+    b_task_id = hook_params_dict['data[FIELDS_AFTER][TASK_ID]']
+    b_task_comment_id = hook_params_dict['data[FIELDS_AFTER][ID]']
+
+    b_task_comment_response = requests.get(
+        f'https://crm.agneko.com/rest/{BITRIX_SECRET}/task.commentitem.get?taskId={b_task_id}&itemId={b_task_comment_id}'
+    ).json()
+    comment_result = b_task_comment_response.get('result')
+    b_task_comment_text = comment_result.get('POST_MESSAGE')
+
+    logger.info(b_task_comment_text)
+
+def bb(b_task_id):
+    list_info = {
+        "list_info": {
+            "row_count": "1",
+            "search_fields": {
+                    'udf_fields.sline_bitrix_task_id': b_task_id
+            }
+        }
+    }
+    headers = {'authtoken': SC_TOKEN}
+    params = {'input_data': json.dumps(list_info)}
+    sdp_task_response = requests.get(
+            url='https://support.agneko.com/api/v3/tasks',
+            headers=headers, params=params, verify=False,
+    )
+    logger.info(sdp_task_response.json())
+    sc_task_id = sdp_task_response.json().get('tasks')[0].get('id')
+    logger.info(f'{sc_task_id=}')
+
+    task_update = {
+        "task": {
+            "status": {
+                "name": "Закрыта"
+            },
+        }
+    }
+    params = {'input_data': json.dumps(list_info)}
+    sdp_task_response = requests.put(
+            url=f'https://support.agneko.com/api/v3/tasks/{sc_task_id}',
+            headers=headers, params=params, verify=False,
+    )
+
     
 
 if __name__ == '__main__':
+    bb(100)
     uvicorn.run('main:app',
                 host='0.0.0.0',
                 port=8000,
