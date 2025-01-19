@@ -183,6 +183,14 @@ async def comment_task_was_completed(request: Request):
         logger.info(sdp_task_response.json())
     # TODO: else add worklog
 
+
+@app.get('/a/{task_id}')
+def close_task(task_id):
+    logger.info(f'catch {task_id} task')
+    bitrix_response = requests.get(
+        f'https://crm.agneko.com/rest/{BITRIX_SECRET}/tasks.task.update?taskId={task_id}&fields[STATUS]=5'
+    )
+    logger.info(bitrix_response)
     
 
 if __name__ == '__main__':
