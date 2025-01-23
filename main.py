@@ -54,20 +54,24 @@ async def main(request: Request):
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/task.item.getdata?taskId={task_id}'
     ).json()
     uf_crm_task = task_item_response.get('result').get('UF_CRM_TASK')
-    lead_id = uf_crm_task[0].split('_')[-1]
-    logger.info(f'{lead_id=}')
+    if uf_crm_task is False:
+        contact_email = "support@agneko.com"
+        logger.info("Not a lead task")
+    else:
+        lead_id = uf_crm_task[0].split('_')[-1]
+        logger.info(f'{lead_id=}')
 
-    lead_response = requests.get(
-            f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
-    ).json()
-    contact_id = lead_response.get('result').get('CONTACT_ID')
-    logger.info(f'{contact_id=}')
+        lead_response = requests.get(
+                f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
+        ).json()
+        contact_id = lead_response.get('result').get('CONTACT_ID')
+        logger.info(f'{contact_id=}')
 
-    contact_response = requests.get(
-            f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.contact.get?id={contact_id}'
-    ).json()
-    contact_email = contact_response.get('result').get('EMAIL')[0].get('VALUE')
-    logger.info(f'{contact_email=}')
+        contact_response = requests.get(
+                f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.contact.get?id={contact_id}'
+        ).json()
+        contact_email = contact_response.get('result').get('EMAIL')[0].get('VALUE')
+        logger.info(f'{contact_email=}')
 
 
 
