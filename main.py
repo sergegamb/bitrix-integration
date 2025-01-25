@@ -56,6 +56,9 @@ async def main(request: Request):
     uf_crm_task = task_item_response.get('result').get('UF_CRM_TASK')
     if uf_crm_task is False:
         contact_email = "support@agneko.com"
+        for word in task_title.split():
+            if '@' in word:
+                contact_email = word
         logger.info("Not a lead task")
     else:
         lead_id = uf_crm_task[0].split('_')[-1]
@@ -71,7 +74,7 @@ async def main(request: Request):
                 f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.contact.get?id={contact_id}'
         ).json()
         contact_email = contact_response.get('result').get('EMAIL')[0].get('VALUE')
-        logger.info(f'{contact_email=}')
+    logger.info(f'{contact_email=}')
 
 
 
