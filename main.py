@@ -59,6 +59,10 @@ async def main(request: Request):
     ).json()
     user_email = user_response['result'][0]['EMAIL']
     logger.info(f'{user_email=}')
+    white_list = ['gusev@agneko.com', 'marakushev@agneko.com', 'mikhaylov@agneko.com']
+    if user_email not in white_list:
+        logger.info('aborting')
+        return
 
     task_item_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/task.item.getdata?taskId={task_id}'
