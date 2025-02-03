@@ -50,7 +50,7 @@ async def main(request: Request):
         for word in group_name.split():
             if '@' in word:
                 contact_email = word
-        contact_email.rstrip(')')
+        contact_email = contact_email.rstrip(')')
     else:
         logger.info("Not in project")
 
