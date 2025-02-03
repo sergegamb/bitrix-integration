@@ -43,6 +43,16 @@ async def main(request: Request):
     task_description = task['description']
     responsible_id = task['responsible']['id']
     logger.info(f'{responsible_id=}')
+    group = task.get('group')
+    contact_email = None
+    if group:
+        group_name = group.get('name')
+        for word in group_name.split():
+            if '@' in word:
+                contact_email = word
+        contact_email.rstrip(')')
+    else:
+        logger.info("Not in project")
 
     user_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/user.get.json?ID={responsible_id}'
@@ -54,26 +64,27 @@ async def main(request: Request):
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/task.item.getdata?taskId={task_id}'
     ).json()
     uf_crm_task = task_item_response.get('result').get('UF_CRM_TASK')
-    if uf_crm_task is False:
-        contact_email = "support@agneko.com"
-        for word in task_title.split():
-            if '@' in word:
-                contact_email = word
-        logger.info("Not a lead task")
-    else:
-        lead_id = uf_crm_task[0].split('_')[-1]
-        logger.info(f'{lead_id=}')
+    if contact_email is None:
+        if uf_crm_task is False:
+            contact_email = "support@agneko.com"
+            for word in task_title.split():
+                if '@' in word:
+                    contact_email = word
+            logger.info("Not a lead task")
+        else:
+            lead_id = uf_crm_task[0].split('_')[-1]
+            logger.info(f'{lead_id=}')
 
-        lead_response = requests.get(
-                f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
-        ).json()
-        contact_id = lead_response.get('result').get('CONTACT_ID')
-        logger.info(f'{contact_id=}')
+            lead_response = requests.get(
+                    f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.lead.get?id={lead_id}'
+            ).json()
+            contact_id = lead_response.get('result').get('CONTACT_ID')
+            logger.info(f'{contact_id=}')
 
-        contact_response = requests.get(
-                f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.contact.get?id={contact_id}'
-        ).json()
-        contact_email = contact_response.get('result').get('EMAIL')[0].get('VALUE')
+            contact_response = requests.get(
+                    f'https://crm.agneko.com/rest/{BITRIX_SECRET}/crm.contact.get?id={contact_id}'
+            ).json()
+            contact_email = contact_response.get('result').get('EMAIL')[0].get('VALUE')
     logger.info(f'{contact_email=}')
 
 
