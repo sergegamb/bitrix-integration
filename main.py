@@ -54,6 +54,14 @@ async def main(request: Request):
     else:
         logger.info("Not in project")
 
+    if group:
+        group_id = group.get('id')
+        task_url = (
+           f"https://crm.agneko.com/workgroups/group/{group_id}/tasks/task/view/{task_id}/"
+        )
+    else:
+        task_url = None
+
     user_response = requests.get(
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/user.get.json?ID={responsible_id}'
     ).json()
@@ -126,7 +134,8 @@ async def main(request: Request):
                     'id': account.get('id')
                 },
                 'udf_fields': {
-                    'sline_bitrix_task_id': task_id
+                    'sline_bitrix_task_id': task_id,
+                    'sline_bitrix_task_url': task_url,
                 }
             }
     }
