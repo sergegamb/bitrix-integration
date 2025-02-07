@@ -146,7 +146,7 @@ async def main(request: Request):
     )
     logger.info(sc_task_response.json())
     
-    sc_task_id = sc_task_response.get('task').get('id')
+    sc_task_id = sc_task_response.json().get('task').get('id')
     sc_task_url = (
         f"https://support.agneko.com//ui/tasks?mode=detail&taskId={sc_task_id}"
     )
