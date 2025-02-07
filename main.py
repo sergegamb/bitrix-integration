@@ -140,11 +140,21 @@ async def main(request: Request):
             }
     }
     params = {'input_data': json.dumps(sdp_task)}
-    sdp_task_response = requests.post(
+    sc_task_response = requests.post(
             url='https://support.agneko.com/api/v3/tasks',
             headers=headers, params=params, verify=False,
     )
-    print(sdp_task_response.json())
+    logger.info(sc_task_response.json())
+    
+    sc_task_id = sc_task_response.get('task').get('id')
+    sc_task_url = (
+        f"https://support.agneko.com//ui/tasks?mode=detail&taskId={sc_task_id}"
+    )
+
+    add_comment_response = requests.get(
+        f"https://crm.agneko.com/rest/{BITRIX_SECRET}/task.commentitem.add?taskId={task_id}&FIELDS[POST_MESSAGE]={sc_task_url}"
+    ).json()
+    logger.info(add_comment_response)
 
 
 
