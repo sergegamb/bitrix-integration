@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 import requests
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
 import uvicorn
 
 
@@ -150,7 +150,7 @@ async def main(request: Request):
     sc_task_url = (
         f"https://support.agneko.com//ui/tasks?mode=detail&taskId={sc_task_id}"
     )
-
+    sc_task_url = quote(sc_task_url)
     add_comment_response = requests.get(
         f"https://crm.agneko.com/rest/{BITRIX_SECRET}/task.commentitem.add?taskId={task_id}&FIELDS[POST_MESSAGE]={sc_task_url}"
     ).json()
