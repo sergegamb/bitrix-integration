@@ -41,7 +41,7 @@ async def a(request: Request):
 
     # если переведена в работу - создать задачу в сц
     task_status = task['status']
-    if task_status != 3:
+    if task_status != '3':
         return
         
     task_title = task['title']
@@ -151,7 +151,6 @@ async def a(request: Request):
             headers=headers, params=params, verify=False,
     )
     logger.info(sc_task_response.json())
-    
     sc_task_id = sc_task_response.json().get('task').get('id')
     sc_task_url = (
         f"https://support.agneko.com//ui/tasks?mode=detail&taskId={sc_task_id}"
