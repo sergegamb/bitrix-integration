@@ -23,8 +23,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@app.post('/')
-async def main(request: Request):
+@app.post('/a')
+async def a(request: Request):
     body = await request.body()
     hook_parameters = unquote(body.decode()).split('&')
     hook_params_dict = {}
@@ -38,6 +38,12 @@ async def main(request: Request):
             f'https://crm.agneko.com/rest/{BITRIX_SECRET}/tasks.task.get?taskId={task_id}'
     ).json()
     task = task_response['result']['task']
+
+    # если переведена в работу - создать задачу в сц
+    task_status = task['status']
+    if task_status != 3:
+        return
+        
     task_title = task['title']
     logger.info(f'Got task {task_title}')
     task_description = task['description']
@@ -155,19 +161,6 @@ async def main(request: Request):
         f"https://crm.agneko.com/rest/{BITRIX_SECRET}/task.commentitem.add?taskId={task_id}&FIELDS[POST_MESSAGE]={sc_task_url}"
     ).json()
     logger.info(add_comment_response)
-
-
-
-@app.post('/a')
-async def a(request: Request):
-    body = await request.body()
-    hook_parameters = unquote(body.decode()).split('&')
-    hook_params_dict = {}
-    for elem in hook_parameters:
-        k, v = elem.split('=')
-
-        hook_params_dict[k] = v
-    print(hook_parameters)
 
 
 @app.post('/b')
